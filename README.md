@@ -31,8 +31,10 @@ PokeScrap/
 2. Installez les dépendances :
 
 ```bash
-pip install requests inquirer
+pip install requests inquirer pillow
 ```
+
+**Note** : `pillow` est nécessaire pour convertir les images PNG en WebP.
 
 ## Utilisation
 
@@ -60,11 +62,23 @@ Pour régénérer uniquement l'index HTML :
 python generate_index_html.py
 ```
 
+### Conversion PNG → WebP
+
+Pour convertir toutes les images PNG existantes en WebP :
+
+```bash
+python convert_png_to_webp.py
+```
+
+**Note** : Le script `download_images.py` convertit automatiquement les PNG en WebP lors du téléchargement.
+
 ## Format des fichiers
 
 Les images sont nommées selon le format :
-- `{SET_ID}_{ID_PADDED}_{LANG}.{extension}`
+- `{SET_ID}_{ID_PADDED}_{LANG}.webp`
 - Exemple : `A1_001_FR.webp`, `A1_001_EN.webp`
+
+**Toutes les images sont automatiquement converties en WebP** pour un format uniforme et une meilleure compression.
 
 ## Fonctionnalités du site web
 

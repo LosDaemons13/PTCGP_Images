@@ -7,6 +7,7 @@ import subprocess
 import sys
 from urllib.parse import urlparse
 from pathlib import Path
+from PIL import Image
 
 # Configuration
 IMAGES_DIR = "images"
@@ -29,8 +30,42 @@ def get_file_extension(url):
         return os.path.splitext(path)[1]
     return '.webp'  # Extension par défaut
 
+def convert_to_webp(image_path):
+    """Convertit une image en WebP si ce n'est pas déjà le cas"""
+    if image_path.lower().endswith('.webp'):
+        return True
+    
+    try:
+        # Ouvrir l'image
+        img = Image.open(image_path)
+        
+        # Convertir en RGB si nécessaire
+        if img.mode in ('RGBA', 'LA', 'P'):
+            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            rgb_img.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+            img = rgb_img
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Créer le nom du fichier WebP
+        webp_path = os.path.splitext(image_path)[0] + '.webp'
+        
+        # Sauvegarder en WebP
+        img.save(webp_path, 'WEBP', quality=95)
+        
+        # Supprimer l'ancien fichier
+        if os.path.exists(webp_path) and webp_path != image_path:
+            os.remove(image_path)
+        
+        return True
+    except Exception as e:
+        print(f"    ⚠️  Erreur lors de la conversion en WebP: {e}")
+        return False
+
 def download_image(url, filepath, max_retries=3):
-    """Télécharge une image avec gestion des erreurs et retries"""
+    """Télécharge une image avec gestion des erreurs et retries, puis convertit en WebP si nécessaire"""
     for attempt in range(max_retries):
         try:
             response = requests.get(url, timeout=30, stream=True)
@@ -39,12 +74,29 @@ def download_image(url, filepath, max_retries=3):
             # Créer le dossier si nécessaire
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             
-            # Sauvegarder l'image
-            with open(filepath, 'wb') as f:
+            # Télécharger dans un fichier temporaire avec l'extension originale de l'URL
+            temp_ext = get_file_extension(url)
+            temp_path = os.path.splitext(filepath)[0] + temp_ext
+            
+            with open(temp_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
             
-            return True
+            # Convertir en WebP si ce n'est pas déjà un WebP
+            if not temp_path.lower().endswith('.webp'):
+                if convert_to_webp(temp_path):
+                    # Le fichier WebP a été créé et le PNG supprimé
+                    return True
+                else:
+                    # Si la conversion échoue, renommer le fichier temporaire
+                    if os.path.exists(temp_path):
+                        os.rename(temp_path, filepath)
+                    return True
+            else:
+                # Si c'est déjà un WebP, renommer si nécessaire
+                if temp_path != filepath:
+                    os.rename(temp_path, filepath)
+                return True
         except Exception as e:
             if attempt < max_retries - 1:
                 print(f"  ⚠️  Tentative {attempt + 1}/{max_retries} échouée, nouvelle tentative...")
@@ -176,8 +228,8 @@ def download_images_unified(cards_fr, cards_en, selected_sets):
             for card_info in organized[set_id]["FR"]:
                 card_id = card_info["id_set"]
                 card_id_padded = str(card_id).zfill(3)
-                extension = get_file_extension(card_info["url"])
-                filename = f"{set_id}_{card_id_padded}_FR{extension}"
+                # Forcer l'extension .webp
+                filename = f"{set_id}_{card_id_padded}_FR.webp"
                 filepath = os.path.join(set_dir, filename)
                 
                 if os.path.exists(filepath):
@@ -199,8 +251,8 @@ def download_images_unified(cards_fr, cards_en, selected_sets):
             for card_info in organized[set_id]["EN"]:
                 card_id = card_info["id_set"]
                 card_id_padded = str(card_id).zfill(3)
-                extension = get_file_extension(card_info["url"])
-                filename = f"{set_id}_{card_id_padded}_EN{extension}"
+                # Forcer l'extension .webp
+                filename = f"{set_id}_{card_id_padded}_EN.webp"
                 filepath = os.path.join(set_dir, filename)
                 
                 if os.path.exists(filepath):

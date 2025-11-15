@@ -34,10 +34,11 @@ def get_image_structure():
             file_path = os.path.join(set_path, filename)
             if os.path.isdir(file_path):
                 continue
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif')):
-                if filename.endswith('_FR.' + filename.split('.')[-1]) or '_FR.' in filename:
+            # Ne garder que les fichiers WebP
+            if filename.lower().endswith('.webp'):
+                if '_FR.webp' in filename or filename.endswith('_FR.webp'):
                     images_fr.append(filename)
-                elif filename.endswith('_EN.' + filename.split('.')[-1]) or '_EN.' in filename:
+                elif '_EN.webp' in filename or filename.endswith('_EN.webp'):
                     images_en.append(filename)
         
         # Trier les images par ID numérique
