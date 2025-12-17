@@ -45,6 +45,7 @@ sets_info = {
 	"A4a": {"name": "Secluded Springs", "max_cards": 105},
 	"A4b": {"name": "Deluxe Pack ex", "max_cards": 379},
 	"B1": {"name": "Mega Rising", "max_cards": 331},
+	"B1a": {"name": "Crimson Blaze", "max_cards": 103},
 }
 
 sets = list(sets_info.keys())
@@ -99,6 +100,8 @@ def set_initial_card_index(set_id):
 		cardIndex = 1626
 	elif set_id == "B1":
 		cardIndex = 2010
+	elif set_id == "B1a":
+		cardIndex = 2346
 	else:
 		cardIndex = 0
 
@@ -263,6 +266,17 @@ def extract_id(soup):
 		return 2004
 	elif currentCardIndex > 2004 and currentCardIndex < 2010:
 		return currentCardIndex + 6
+	elif currentCardIndex == 2112:  # fin B1
+		cardIndex = 2118
+		return 2112
+	elif currentCardIndex > 2112 and currentCardIndex < 2118:
+		return currentCardIndex + 6
+	elif currentCardIndex == 2340:  # fin B1a
+		cardIndex = 2346
+		return 2340
+	elif currentCardIndex > 2340 and currentCardIndex < 2346:
+		return currentCardIndex + 6
+		
 	return currentCardIndex
 
 def extract_id_set(soup):
@@ -314,7 +328,8 @@ def extract_wp_gp_eligible(id_set, set_details, rarity):
 		"(A4)" in set_details and int(id_set) >= 212 or
 		"(A4a)" in set_details and int(id_set) >= 91 or
 		"(A4b)" in set_details and int(id_set) >= 377 or
-		"(B1)" in set_details and int(id_set) >= 287
+		"(B1)" in set_details and int(id_set) >= 287 or
+		"(B1a)" in set_details and int(id_set) >= 88
 	)
 	fitStars = rarity == "☆☆" or rarity == "☆"
 
@@ -406,7 +421,19 @@ def convert_cards_to_json(start_id, end_id, selected_sets=None, limit_per_set=No
 			url = f"{BASE_URL}{set_name}/{i}"
 			if set_name == "A4b":
 				print(f"[A4b][loop] URL: {url}")
-			response = requests.get(url)
+
+			# Requête avec timeout + gestion des erreurs réseau pour éviter les blocages
+			try:
+				response = requests.get(url, timeout=10)
+				response.raise_for_status()
+			except Exception as e:
+				print(f"\n❌ Erreur réseau/HTTP pour {url}: {e}")
+				error_tracker += 1
+				if error_tracker > 4:
+					print(f"\n⚠️ Arrêt du traitement après {error_tracker} erreurs consécutives")
+					break
+				continue
+
 			soup = BeautifulSoup(response.content, "html.parser")
 			try:
 				card_info = extract_card_info(soup)
@@ -457,8 +484,14 @@ def convert_cards_to_json(start_id, end_id, selected_sets=None, limit_per_set=No
 
 def getInGameCardInfo():
 	global ingame_CardsInfo
-	# Requête pour récupérer les données
-	response = requests.get(BASE_URL_GameScrapped)
+	print("\n🌐 Récupération des données in‑game (BASE_URL_GameScrapped)...")
+	try:
+		# Requête pour récupérer les données (avec timeout pour éviter les blocages)
+		response = requests.get(BASE_URL_GameScrapped, timeout=15)
+	except Exception as e:
+		print(f"⚠️  Impossible de contacter le serveur des données in‑game ({BASE_URL_GameScrapped}) : {e}")
+		print("   → Le script va continuer sans ID in‑game (les autres infos seront quand même scrapées).")
+		return
 
 	# Vérifie que la requête a réussi
 	if response.status_code == 200:
@@ -485,6 +518,7 @@ def getInGameCardInfo():
 		print(f"[A4b][getInGameCardInfo] sample keys: {a4b_keys[:10]}")
 	else:
 		print(f"Erreur lors de la récupération des données. Code: {response.status_code}")
+		print("   → Le script va continuer sans ID in‑game (les autres infos seront quand même scrapées).")
 
 if __name__ == "__main__":
 	args = parse_arguments()
@@ -513,6 +547,7 @@ if __name__ == "__main__":
 	init_time = time.time()
 	cardIndex = 0
 	ingame_CardsInfo = {}
+	print("\n⏳ Initialisation des données in‑game...")
 	getInGameCardInfo()
 
 	# Demande interactive d'une limite de cartes si on est en mode interactif ou défaut

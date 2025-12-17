@@ -36,7 +36,8 @@ sets = {
     # Nouveaux sets
     "source-secrete": {"id": "A4a", "max_cards": 105, "name": "Secluded Springs"},
     "booster-de-luxe-ex": {"id": "A4b", "max_cards": 379, "name": "Deluxe Pack ex"},
-    "mega-ascension": {"id": "B1", "max_cards": 331, "name": "Mega Rising"}
+    "mega-ascension": {"id": "B1", "max_cards": 331, "name": "Mega Rising"},
+    "embrasement-ecarlate": {"id": "B1a", "max_cards": 103, "name": "Crimson Blaze"}
 }
 
 # Configuration des cartes Promo-A
@@ -77,6 +78,8 @@ def set_initial_card_index(set_id):
     elif set_id == "B1":
         # Début après A4b (fin 2004) avec un écart de 6
         cardIndex = 2010
+    elif set_id == "B1a":
+        cardIndex = 2346
     else:
         cardIndex = 0
 
@@ -144,7 +147,8 @@ def extract_wp_gp_eligible(set_id, card_number, rarity):
         (set_id == "A4" and int(card_number) >= 212) or
         (set_id == "A4a" and int(card_number) >= 91) or
         (set_id == "A4b" and int(card_number) >= 377) or
-        (set_id == "B1" and int(card_number) >= 287)
+        (set_id == "B1" and int(card_number) >= 287) or
+        (set_id == "B1a" and int(card_number) >= 88)
     )
     fitStars = rarity == "☆☆" or rarity == "☆"
     eligible = fitStars and not isShiny
@@ -284,6 +288,11 @@ def extract_id():
         cardIndex = 2010
         return 2004
     elif currentCardIndex > 2004 and currentCardIndex < 2010:
+        return currentCardIndex + 6
+    elif currentCardIndex == 2340:  # fin B1a
+        cardIndex = 2346
+        return 2340
+    elif currentCardIndex > 2340 and currentCardIndex < 2346:
         return currentCardIndex + 6
     return currentCardIndex
 
