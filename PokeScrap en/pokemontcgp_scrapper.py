@@ -46,6 +46,7 @@ sets_info = {
 	"A4b": {"name": "Deluxe Pack ex", "max_cards": 379},
 	"B1": {"name": "Mega Rising", "max_cards": 331},
 	"B1a": {"name": "Crimson Blaze", "max_cards": 103},
+	"B2": {"name": "Fantastical Parade", "max_cards": 234}
 }
 
 sets = list(sets_info.keys())
@@ -102,6 +103,8 @@ def set_initial_card_index(set_id):
 		cardIndex = 2010
 	elif set_id == "B1a":
 		cardIndex = 2346
+	elif set_id == "B2":
+		cardIndex = 2454
 	else:
 		cardIndex = 0
 
@@ -329,7 +332,8 @@ def extract_wp_gp_eligible(id_set, set_details, rarity):
 		"(A4a)" in set_details and int(id_set) >= 91 or
 		"(A4b)" in set_details and int(id_set) >= 377 or
 		"(B1)" in set_details and int(id_set) >= 287 or
-		"(B1a)" in set_details and int(id_set) >= 88
+		"(B1a)" in set_details and int(id_set) >= 88 or
+		"(B2)" in set_details and int(id_set) >= 205
 	)
 	fitStars = rarity == "☆☆" or rarity == "☆"
 
