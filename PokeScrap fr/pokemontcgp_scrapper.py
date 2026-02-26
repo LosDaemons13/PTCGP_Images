@@ -38,7 +38,8 @@ sets = {
     "booster-de-luxe-ex": {"id": "A4b", "max_cards": 379, "name": "Deluxe Pack ex"},
     "mega-ascension": {"id": "B1", "max_cards": 331, "name": "Mega Rising"},
     "embrasement-ecarlate": {"id": "B1a", "max_cards": 103, "name": "Crimson Blaze"},
-    "parade-onirique": {"id": "B2", "max_cards": 234, "name": "Fantastical Parade"}
+    "parade-onirique": {"id": "B2", "max_cards": 234, "name": "Fantastical Parade"},
+    "merveilles-de-paldea": {"id": "B2a", "max_cards": 131, "name": "Paldean Wonders"}
 }
 
 # Configuration des cartes Promo-A
@@ -83,6 +84,9 @@ def set_initial_card_index(set_id):
         cardIndex = 2346
     elif set_id == "B2":
         cardIndex = 2454
+    elif set_id == "B2a":
+        # Début après B2 (fin 2687) avec un écart de 6
+        cardIndex = 2693
     else:
         cardIndex = 0
 
@@ -152,7 +156,8 @@ def extract_wp_gp_eligible(set_id, card_number, rarity):
         (set_id == "A4b" and int(card_number) >= 377) or
         (set_id == "B1" and int(card_number) >= 287) or
         (set_id == "B1a" and int(card_number) >= 88) or
-        (set_id == "B2" and int(card_number) >= 205)
+        (set_id == "B2" and int(card_number) >= 205) or
+        (set_id == "B2a" and int(card_number) >= 116)
     )
     fitStars = rarity == "☆☆" or rarity == "☆"
     eligible = fitStars and not isShiny
@@ -298,6 +303,11 @@ def extract_id():
         return 2340
     elif currentCardIndex > 2340 and currentCardIndex < 2346:
         return currentCardIndex + 6
+    elif currentCardIndex == 2687:  # fin B2
+        cardIndex = 2693
+        return 2687
+    elif currentCardIndex > 2687 and currentCardIndex < 2693:
+        return currentCardIndex + 6
     return currentCardIndex
 
 def extract_name(soup):
@@ -354,6 +364,8 @@ def extract_set_subpack(soup):
         return "Mega Gyarados pack"
     elif pack_name == "Méga-Altaria":
         return "Mega Altaria pack"
+    elif pack_name == "Paldea":
+        return "Every pack"
     else:
         return f"{pack_name} pack"
 

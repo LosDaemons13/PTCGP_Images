@@ -46,7 +46,8 @@ sets_info = {
 	"A4b": {"name": "Deluxe Pack ex", "max_cards": 379},
 	"B1": {"name": "Mega Rising", "max_cards": 331},
 	"B1a": {"name": "Crimson Blaze", "max_cards": 103},
-	"B2": {"name": "Fantastical Parade", "max_cards": 234}
+	"B2": {"name": "Fantastical Parade", "max_cards": 234},
+	"B2a": {"name": "Paldean Wonders", "max_cards": 131}
 }
 
 sets = list(sets_info.keys())
@@ -105,6 +106,9 @@ def set_initial_card_index(set_id):
 		cardIndex = 2346
 	elif set_id == "B2":
 		cardIndex = 2454
+	elif set_id == "B2a":
+		# Starts after B2 (ends at 2687) with a +6 gap
+		cardIndex = 2693
 	else:
 		cardIndex = 0
 
@@ -279,6 +283,11 @@ def extract_id(soup):
 		return 2340
 	elif currentCardIndex > 2340 and currentCardIndex < 2346:
 		return currentCardIndex + 6
+	elif currentCardIndex == 2687:  # end B2
+		cardIndex = 2693
+		return 2687
+	elif currentCardIndex > 2687 and currentCardIndex < 2693:
+		return currentCardIndex + 6
 		
 	return currentCardIndex
 
@@ -333,7 +342,8 @@ def extract_wp_gp_eligible(id_set, set_details, rarity):
 		"(A4b)" in set_details and int(id_set) >= 377 or
 		"(B1)" in set_details and int(id_set) >= 287 or
 		"(B1a)" in set_details and int(id_set) >= 88 or
-		"(B2)" in set_details and int(id_set) >= 205
+		"(B2)" in set_details and int(id_set) >= 205 or
+		"(B2a)" in set_details and int(id_set) >= 116
 	)
 	fitStars = rarity == "☆☆" or rarity == "☆"
 
