@@ -39,7 +39,8 @@ sets = {
     "mega-ascension": {"id": "B1", "max_cards": 331, "name": "Mega Rising"},
     "embrasement-ecarlate": {"id": "B1a", "max_cards": 103, "name": "Crimson Blaze"},
     "parade-onirique": {"id": "B2", "max_cards": 234, "name": "Fantastical Parade"},
-    "merveilles-de-paldea": {"id": "B2a", "max_cards": 131, "name": "Paldean Wonders"}
+    "merveilles-de-paldea": {"id": "B2a", "max_cards": 131, "name": "Paldean Wonders"},
+    "mega-rayonnement": {"id": "B2b", "max_cards": 117, "name": "Mega Shine"}
 }
 
 # Configuration des cartes Promo-A
@@ -87,6 +88,9 @@ def set_initial_card_index(set_id):
     elif set_id == "B2a":
         # Début après B2 (fin 2687) avec un écart de 6
         cardIndex = 2693
+    elif set_id == "B2b":
+        # Début après B2a (fin 2823) avec un écart de 6
+        cardIndex = 2829
     else:
         cardIndex = 0
 
@@ -157,7 +161,8 @@ def extract_wp_gp_eligible(set_id, card_number, rarity):
         (set_id == "B1" and int(card_number) >= 287) or
         (set_id == "B1a" and int(card_number) >= 88) or
         (set_id == "B2" and int(card_number) >= 205) or
-        (set_id == "B2a" and int(card_number) >= 116)
+        (set_id == "B2a" and int(card_number) >= 116) or
+        (set_id == "B2b" and int(card_number) >= 87)
     )
     fitStars = rarity == "☆☆" or rarity == "☆"
     eligible = fitStars and not isShiny
@@ -308,6 +313,11 @@ def extract_id():
         return 2687
     elif currentCardIndex > 2687 and currentCardIndex < 2693:
         return currentCardIndex + 6
+    elif currentCardIndex == 2823:  # fin B2a
+        cardIndex = 2829
+        return 2823
+    elif currentCardIndex > 2823 and currentCardIndex < 2829:
+        return currentCardIndex + 6
     return currentCardIndex
 
 def extract_name(soup):
@@ -339,7 +349,11 @@ def extract_set_subpack(soup):
         logging.warning("Lien du pack non trouvé")
         return ""
 
-    pack_name = pack_link.text.strip().split()[-1]
+    pack_words = pack_link.text.strip().split()
+    if not pack_words:
+        logging.debug("Texte du lien pack vide, utilisation de 'Every pack'")
+        return "Every pack"
+    pack_name = pack_words[-1]
     logging.debug(f"Nom du pack trouvé : {pack_name}")
 
     # Appliquer les règles de remplacement

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.pokekalos.fr)",
+      "Bash(curl -s \"https://www.pokekalos.fr/jeux/mobile/pocket/cartodex/extensions/mega-rayonnement/cartes/1.html\")"
+    ]
+  }
+}
